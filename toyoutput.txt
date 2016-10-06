@@ -1,0 +1,22 @@
+=====================Top 10 words for topic 0=====================
+protests
+man
+tiananmen
+party
+beijing
+china
+square
+tanks
+chinese
+tank
+=====================Top 10 words for topic 1=====================
+learning
+bayesian
+human
+data
+models
+cognitive
+computational
+concepts
+language
+people
