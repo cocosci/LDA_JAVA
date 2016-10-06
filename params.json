@@ -1,0 +1,6 @@
+{
+  "name": "Lda java",
+  "tagline": "",
+  "body": "# LDA in Java\r\nPart of the term project in distributed systems.\r\n```\r\nSequential Version\r\nAuthor: Kai Zhen\r\nDate: 10/05/2016 11:45pm\r\n```\r\n\r\n# Run it in eclipse.\r\n\r\nArguments: toyinput.txt toyoutput.txt 2000 1.0 0.1 2 10\r\n\r\n# Output file\r\n\r\n```\r\n=====================Top 10 words for topic 0=====================\r\nprotests\r\nman\r\ntiananmen\r\nparty\r\nbeijing\r\nchina\r\nsquare\r\ntanks\r\nchinese\r\ntank\r\n=====================Top 10 words for topic 1=====================\r\nlearning\r\nbayesian\r\nhuman\r\ndata\r\nmodels\r\ncognitive\r\ncomputational\r\nconcepts\r\nlanguage\r\npeople\r\n```\r\n\r\n# To Do...\r\nLDA is more for the situation where each topic is relatively as powerful as others. If there are 4 docs mainly for topic A, 4 for topic B, and only 1 for topic C. Then there is an issue.\r\n\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
