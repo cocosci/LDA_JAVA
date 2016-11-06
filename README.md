@@ -5,6 +5,9 @@ Sequential Version
 Author: Kai Zhen
 Date: 10/05/2016 11:45pm
 ```
+# Report on integrating out multinomial parameters
+
+http://pages.iu.edu/~zhenk/lda_appendix.pdf
 
 # Run it in eclipse.
 
