@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 public class LDAFileReader {
 	private String inputFile;
 	private String outputFile;
+	private String outputFile2;
 	private Integer iterations;
 	private Integer totalNumofDistinctWord = 0;
 	private int totalNumofDocs = 0;
@@ -12,6 +13,7 @@ public class LDAFileReader {
 	private double beta;
 	private int numoftopic;
 	private int topkwords;
+	private int topkdocs;
 	
 	private HashMap<String,Integer> word2id = new HashMap<String,Integer>();
 	private HashMap<Integer,String> id2word = new HashMap<Integer,String>();
@@ -45,7 +47,7 @@ public class LDAFileReader {
 		ReadStopwords();
 		ReadfromFilesandInit();
 		InitBig3();
-		printVariables();
+		//printVariables();
 	}
 	/**
 	 * Init the big three counters for Gibbs sampling via topicass*/
@@ -90,11 +92,13 @@ public class LDAFileReader {
 	private void parseArgs(String[] args) {
         inputFile=args[0];
         outputFile=args[1];
-        iterations=Integer.parseInt(args[2]);
-        alpha = Double.parseDouble(args[3]);
-        beta = Double.parseDouble(args[4]);
-        numoftopic = Integer.parseInt(args[5]);
-        topkwords = Integer.parseInt(args[6]);
+        outputFile2=args[2];
+        iterations=Integer.parseInt(args[3]);
+        alpha = Double.parseDouble(args[4]);
+        beta = Double.parseDouble(args[5]);
+        numoftopic = Integer.parseInt(args[6]);
+        topkwords = Integer.parseInt(args[7]);
+        topkdocs = Integer.parseInt(args[8]);
        // df=Double.parseDouble(args[3]);
     }
 	/**
@@ -118,8 +122,8 @@ public class LDAFileReader {
 			totalNumofDocs = Integer.parseInt(firstline);
 			for(String line; (line = br.readLine()) != null; ){
 				//clean the input data to remove punctuations..	
-				String[] split_line = line.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
-				
+				//String[] split_line = line.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
+				String[] split_line = line.split("\\s+");
 				// Init wordindoc, word2id,id2freq,word2freq, totalnumofdictinctword, etc.
 				ArrayList<String> temp = new ArrayList<String>();
 				ArrayList<Integer> temp2 = new ArrayList<Integer>();
@@ -213,8 +217,8 @@ public class LDAFileReader {
 	 * stopwords
 	 * with ,:[]
 	 * t<Integer>> Count_for_words_with_topicK_in_docJ = new ArrayList<ArrayList<Integer>>();
-	private ArrayList<ArrayList<Integer>> Count_for_thisword_with_topicK_ALLdoc = new ArrayList<ArrayList<Integer>>();
-	private ArrayList<Integer> Count_for_words_with_topicK_in_ALLdoc = new ArrayList<Integer>();
+	* private ArrayList<ArrayList<Integer>> Count_for_thisword_with_topicK_ALLdoc = new ArrayList<ArrayList<Integer>>();
+	* private ArrayList<Integer> Count_for_words_with_topicK_in_ALLdoc = new ArrayList<Integer>();
 	 * */
 	
 	public void GibbsSampling(){
@@ -311,9 +315,32 @@ public class LDAFileReader {
 	    return matrixOut;
 	}
 	public void WriteRes() throws IOException{
+
+
 		CalculateThetaandPhi();
+
+
+
+		List<List<Double>> THETATranspose = new ArrayList<List<Double>>();
+		THETATranspose = transpose(TheTHETA);
+
 		List<List<Double>> PHITranspose = new ArrayList<List<Double>>();
 		PHITranspose = transpose(ThePHI);
+
+
+		System.out.println(TheTHETA.size());
+for(int i = 0; i < TheTHETA.size(); i++){
+	for(int j = 0; j < TheTHETA.get(i).size(); j++){
+		System.out.print(TheTHETA.get(i).get(j)+" ");
+	}
+	System.out.println();
+}
+for(int i = 0; i < THETATranspose.size(); i++){
+	for(int j = 0; j < THETATranspose.get(i).size(); j++){
+		System.out.print(THETATranspose.get(i).get(j)+" ");
+	}
+	System.out.println();
+}
 		/*** WRONG CODE: CANNOT DEAL WITH DUPLICATED VALUES.
 		//PHI Transpose
 		
@@ -357,6 +384,28 @@ public class LDAFileReader {
 		    }
 		    TopK_ID.add(tempindex);
 		}
+
+
+		//Comparator<Entry<Integer, Double>> comparator = new Hashkey();
+		PriorityQueue<Map.Entry<Integer, Double>> pq2 = new PriorityQueue<Map.Entry<Integer, Double>>(comparator);
+		ArrayList<ArrayList<Integer>> TopK_ID2 = new ArrayList<ArrayList<Integer>>();
+		for(int k = 0; k < numoftopic; k++){
+			HashMap<Integer,Double> hh = new HashMap<Integer,Double>();
+			ArrayList<Integer> tempindex = new ArrayList<Integer>();
+			for(int m = 0; m < wordindoc.size(); m++){
+				hh.put(m, THETATranspose.get(k).get(m));
+			}
+			Iterator it = hh.entrySet().iterator();
+		    while (it.hasNext()) {
+		        pq.offer((Entry<Integer, Double>) it.next());
+		    }
+		    for(int t = 0; t <  topkdocs; t++){
+		    	Map.Entry<Integer, Double> e = pq.poll();
+		    	tempindex.add(e.getKey());
+		    	//System.out.print(e.getKey());
+		    }
+		    TopK_ID2.add(tempindex);
+		}
 		//Write top K words for each topic in file.
 		File fout = new File(outputFile);
 		FileOutputStream fos = new FileOutputStream(fout);
@@ -374,7 +423,39 @@ public class LDAFileReader {
 			
 		}
 		bw.close();
+
+		//Write top K docs for each topic in file.
+		File fout2 = new File(outputFile2);
+		FileOutputStream fos2 = new FileOutputStream(fout2);
+	 
+		BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(fos2));
 		
-		
+		for(int k = 0; k < numoftopic; k++){
+			bw2.write("====================="+String.format("Top %d docs for topic %d", topkdocs,k)+"=====================");
+			
+			bw2.newLine();
+			for(int m = 0; m < topkdocs; m++){
+				//System.out.println(TopK_ID2.get(k).get(m));
+				bw2.write((TopK_ID2.get(k).get(m).toString()));
+				bw2.newLine();
+			}
+			
+			
+		}
+		bw2.close();
+		//System.out.println(TheTHETA.size());
+		//for(int i = 0; i < TheTHETA.size(); i++){
+		//	for(int j = 0; j < TheTHETA.get(i).size(); j++){
+		//		System.out.print(TheTHETA.get(i).get(j)+" ");
+		//	}
+		//	System.out.println();
+		//}
+		//
+		//for(int i = 0; i < THETATranspose.size(); i++){
+		//	for(int j = 0; j < THETATranspose.get(i).size(); j++){
+		//		System.out.print(THETATranspose.get(i).get(j)+" ");
+		//	}
+		//	System.out.println();
+		//}
 	}
 }
