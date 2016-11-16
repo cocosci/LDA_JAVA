@@ -11,7 +11,7 @@ http://pages.iu.edu/~zhenk/lda_appendix.pdf
 
 # Run it in eclipse.
 
-Arguments: toyinput.txt toyoutput.txt 2000 1.0 0.1 2 10
+Arguments: harpLDAinput2.dat toyoutput.txt toyoutput2.txt 1000 0.5 0.1 30 10 5
 
 # Output file
 
